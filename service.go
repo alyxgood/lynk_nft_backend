@@ -110,15 +110,15 @@ func (svc *Service) httpQueryNFTInfo(c *gin.Context) {
 	}
 	var charismaStr, vitalityStr, intellectStr, dexterityStr string
 
-	keyCharisma := fmt.Sprintf("%s%s", tokenId, "charisma")
-	keyVitality := fmt.Sprintf("%s%s", tokenId, "vitality")
-	keyIntellect := fmt.Sprintf("%s%s", tokenId, "intellect")
-	keyDexterity := fmt.Sprintf("%s%s", tokenId, "dexterity")
+	keyCharisma := fmt.Sprintf("%s-%s", tokenId, "charisma")
+	keyVitality := fmt.Sprintf("%s-%s", tokenId, "vitality")
+	keyIntellect := fmt.Sprintf("%s-%s", tokenId, "intellect")
+	keyDexterity := fmt.Sprintf("%s-%s", tokenId, "dexterity")
 	cacheCharisma, ok1 := svc.mCache.Get(keyCharisma)
 	cacheVitality, ok2 := svc.mCache.Get(keyVitality)
 	cacheIntellect, ok3 := svc.mCache.Get(keyIntellect)
 	cacheDexterity, ok4 := svc.mCache.Get(keyDexterity)
-	if !ok1 && !ok2 && !ok3 && !ok4 {
+	if !ok1 || !ok2 || !ok3 || !ok4 {
 		var arr []interface{}
 		var exist bool
 		arr, exist, err = svc.nftFunc(tokenIdParam)
