@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MAIN_FILES=(name/main.go)
+MAIN_FILES=(./main.go)
 BIN_NAMES=(alyx_nft_backend)
 ROOT_DIR="$(git rev-parse --show-toplevel)"
 BIN_DIR=$ROOT_DIR/bin
