@@ -5,9 +5,6 @@ import (
 	"alyx_nft_backend/models"
 	"alyx_nft_backend/utils"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/patrickmn/go-cache"
-	"github.com/urfave/cli"
 	"log"
 	"math/big"
 	"net/http"
@@ -16,6 +13,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
+	"github.com/urfave/cli"
 )
 
 func main() {
@@ -37,7 +38,8 @@ func main() {
 }
 
 type Service struct {
-	mCache *cache.Cache
+	mCache     *cache.Cache
+	mCacheTime time.Duration
 }
 
 func NewService() *Service {
@@ -53,13 +55,14 @@ func (svc *Service) Start(ctx *cli.Context) error {
 
 	svc.initMainLogger()
 
-	svc.mCache = cache.New(cache.NoExpiration, time.Duration(2)*time.Hour)
+	svc.mCacheTime = time.Duration(1) * time.Minute
+	svc.mCache = cache.New(svc.mCacheTime, svc.mCacheTime)
 
 	router := gin.Default()
 	router.Use(utils.Cors())
 	router.GET(path.Join("/alyx", "/nft/:tokenId"), svc.httpQueryNFTInfo)
 
-	return router.Run("0.0.0.0:8080")
+	return router.Run(fmt.Sprintf("0.0.0.0:%d", consts.Port))
 }
 
 func (svc *Service) initMainLogger() {
@@ -162,10 +165,10 @@ func (svc *Service) httpQueryNFTInfo(c *gin.Context) {
 		intellectStr = arrBigInt[2].String()
 		dexterityStr = arrBigInt[3].String()
 
-		svc.mCache.Set(keyCharisma, charismaStr, time.Duration(2)*time.Hour)
-		svc.mCache.Set(keyVitality, vitalityStr, time.Duration(2)*time.Hour)
-		svc.mCache.Set(keyIntellect, intellectStr, time.Duration(2)*time.Hour)
-		svc.mCache.Set(keyDexterity, dexterityStr, time.Duration(2)*time.Hour)
+		svc.mCache.Set(keyCharisma, charismaStr, svc.mCacheTime)
+		svc.mCache.Set(keyVitality, vitalityStr, svc.mCacheTime)
+		svc.mCache.Set(keyIntellect, intellectStr, svc.mCacheTime)
+		svc.mCache.Set(keyDexterity, dexterityStr, svc.mCacheTime)
 
 	} else {
 		charismaStr = cacheCharisma.(string)
@@ -187,9 +190,9 @@ func (svc *Service) httpQueryNFTInfo(c *gin.Context) {
 	img := fmt.Sprintf(consts.TokenImage, tokenIdParam)
 
 	c.JSON(http.StatusOK, models.ResNFT{
-		Description: "ALYX NFT",
+		Description: "LYNK NFT",
 		Image:       img,
-		Name:        "ALYX NFT",
+		Name:        "LYNK NFT",
 		Attributes:  attribute,
 	})
 
